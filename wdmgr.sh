@@ -115,7 +115,7 @@ while true; do
   read -p "Выберите действие (0-6): " choice
   case $choice in
     1) save_directory ;;
-    2) change_directory ;;
+    2) change_directory && break ;;
     3) show_directory ;;
     4) remove_directory ;;
     5) remove_all_directories ;;
