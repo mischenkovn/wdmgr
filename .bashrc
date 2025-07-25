@@ -1,1 +1,1 @@
-alias wd="source /use/local/bin/wdmgr.sh"
+alias wd="source /usr/local/bin/wdmgr.sh"
