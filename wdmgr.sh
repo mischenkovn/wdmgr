@@ -40,28 +40,40 @@ list_directories() {
 
 # Функция для выбора директории по номеру
 select_directory() {
-  list_directories
-  if [ -d "$wdmgr_dir" ] && [ -n "$(ls -A "$wdmgr_dir")" ]; then
-    read -p "Введите номер директории для выбора: " num
-    if [[ "$num" =~ ^[0-9]+$ ]] && [ "$num" -ge 1 ] && [ "$num" -le ${#names[@]} ]; then
-      selected_name="${names[$((num-1))]}"
-      selected_path="${contents[$((num-1))]}"
-      echo "$1 '$selected_name': $selected_path"
-      return 0
+  while true; do
+    list_directories
+    if [ -d "$wdmgr_dir" ] && [ -n "$(ls -A "$wdmgr_dir")" ]; then
+      echo " 0) Вернуться в главное меню"
+      read -p "Введите номер директории для выбора: " num
+      
+      if [ "$num" -eq 0 ]; then
+        echo "Возврат в главное меню..."
+        return 2
+      fi
+      
+      if [[ "$num" =~ ^[0-9]+$ ]] && [ "$num" -ge 1 ] && [ "$num" -le ${#names[@]} ]; then
+        selected_name="${names[$((num-1))]}"
+        selected_path="${contents[$((num-1))]}"
+        echo "$1 '$selected_name': $selected_path"
+        return 0
+      else
+        echo "Ошибка: неверный номер"
+      fi
     else
-      echo "Ошибка: неверный номер"
-      return 1
+      echo "Нет сохранённых директорий"
+      read -p "Нажмите Enter для возврата в главное меню..."
+      return 2
     fi
-  else
-    echo "Нет сохранённых директорий"
-    return 1
-  fi
+  done
 }
 
 # Функция для перехода к сохранённой директории
 change_directory() {
   if select_directory "Переход в директорию"; then
     cd "$selected_path" && echo "Теперь вы в: $selected_path" || echo "Ошибка перехода в директорию"
+    return 0
+  else
+    return $?
   fi
 }
 
@@ -99,30 +111,37 @@ remove_all_directories() {
   fi
 }
 
-# Главное меню
-while true; do
-  echo ""
-  echo "Меню управления директориями:"
-  echo "1) Сохранить текущую директорию"
-  echo "2) Перейти к сохранённой директории"
-  echo "3) Показать сохранённую директорию"
-  echo "4) Удалить сохранённую директорию"
-  echo "5) Удалить все сохранённые директории"
-  echo "6) Показать список сохранённых директорий"
-  echo "0) Выход"
-  echo ""
+# Сразу выполняем переход к сохранённой директории (пункт 2)
+change_directory
+result=$?
 
-  read -p "Выберите действие (0-6): " choice
-  case $choice in
-    1) save_directory ;;
-    2) change_directory && break ;;
-    3) show_directory ;;
-    4) remove_directory ;;
-    5) remove_all_directories ;;
-    6) list_directories ;;
-    0) break ;;
-    *) echo "Неверный выбор. Пожалуйста, введите число от 0 до 6." ;;
-  esac
-done
+# Если переход не удался (пользователь вернулся в меню или нет директорий), показываем главное меню
+if [ $result -eq 2 ]; then
+  # Главное меню
+  while true; do
+    echo ""
+    echo "Меню управления директориями:"
+    echo "1) Сохранить текущую директорию"
+    echo "2) Перейти к сохранённой директории"
+    echo "3) Показать сохранённую директорию"
+    echo "4) Удалить сохранённую директорию"
+    echo "5) Удалить все сохранённые директории"
+    echo "6) Показать список сохранённых директорий"
+    echo "0) Выход"
+    echo ""
+
+    read -p "Выберите действие (0-6): " choice
+    case $choice in
+      1) save_directory ;;
+      2) change_directory && break ;;
+      3) show_directory ;;
+      4) remove_directory ;;
+      5) remove_all_directories ;;
+      6) list_directories ;;
+      0) break ;;
+      *) echo "Неверный выбор. Пожалуйста, введите число от 0 до 6." ;;
+    esac
+  done
+fi
 
 echo "Работа завершена. До свидания!"
