@@ -2,6 +2,30 @@
 
 wdmgr_dir="$HOME/.wdmgr"
 
+# Функция для проверки Git репозитория и выполнения команд
+check_and_update_git() {
+  
+  # Проверяем, является ли директория Git репозиторием
+  if [ -d ".git" ]; then
+    echo "Обнаружен Git репозиторий в: $path"
+    echo "Выполняю git pull..."
+    
+    # Выполняем git pull
+    if git pull; then
+      echo "git pull выполнен успешно"
+      
+      # Показываем статус
+      echo "Статус репозитория:"
+      git status
+    else
+      echo "Ошибка при выполнении git pull"
+    fi
+    
+  else
+    echo "Директория не является Git репозиторием"
+  fi
+}
+
 # Функция для сохранения текущей директории
 save_directory() {
   read -p "Введите имя для сохранения (по умолчанию 'unnamed'): " name
@@ -70,8 +94,15 @@ select_directory() {
 # Функция для перехода к сохранённой директории
 change_directory() {
   if select_directory "Переход в директорию"; then
-    cd "$selected_path" && echo "Теперь вы в: $selected_path" || echo "Ошибка перехода в директорию"
-    return 0
+    # Пытаемся перейти в директорию
+    if cd "$selected_path"; then
+      echo "Теперь вы в: $selected_path"
+      check_and_update_git
+      return 0
+    else
+      echo "Ошибка перехода в директорию: $selected_path"
+      return 1
+    fi
   else
     return $?
   fi
@@ -81,6 +112,13 @@ change_directory() {
 show_directory() {
   if select_directory "Просмотр директории"; then
     echo "Путь: $selected_path"
+    
+    # Проверяем наличие Git репозитория
+    if [ -d "$selected_path/.git" ]; then
+      echo "✓ Это Git репозиторий"
+    else
+      echo "✗ Это не Git репозиторий"
+    fi
   fi
 }
 
