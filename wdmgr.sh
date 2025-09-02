@@ -52,7 +52,8 @@ has_groups() {
 # Функция для создания группы при первом запуске
 create_first_group() {
   echo "Нет созданных групп."
-  read -p "Хотите создать новую группу? (y/n): " confirm
+  read -n1 -p "Хотите создать новую группу? (y/N): " confirm
+  echo
   if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
     create_group
     return 0
@@ -96,7 +97,8 @@ select_group() {
       done
       echo " 0) Вернуться в главное меню"
       
-      read -p "Введите номер группы для $1: " num
+      read -n1 -p "Введите номер группы для $1: " num
+      echo
       
       if [ "$num" -eq 0 ]; then
         echo "Возврат в главное меню..."
@@ -112,7 +114,8 @@ select_group() {
       fi
     else
       echo "Нет созданных групп"
-      read -p "Нажмите Enter для возврата в главное меню..."
+      read -n1 -p "Нажмите любую клавишу для возврата в главное меню..."
+      echo
       return 2
     fi
   done
@@ -167,7 +170,8 @@ select_directory_in_group() {
     list_directories_in_group "$group"
     if (( ${#paths[@]} )); then
       echo " 0) Вернуться к выбору группы"
-      read -p "Введите номер директории для выбора: " num
+      read -n1 -p "Введите номер директории для выбора: " num
+      echo
       
       if [ "$num" -eq 0 ]; then
         echo "Возврат к выбору группы..."
@@ -183,7 +187,8 @@ select_directory_in_group() {
       fi
     else
       echo "Нет сохранённых директорий в группе '$group'"
-      read -p "Нажмите Enter для возврата к выбору группы..."
+      read -n1 -p "Нажмите любую клавишу для возврата к выбору группы..."
+      echo
       return 2
     fi
   done
@@ -315,7 +320,8 @@ remove_directory() {
 
   if select_group "удаления директории"; then
     if select_directory_in_group "$selected_group"; then
-      read -p "Вы уверены, что хотите удалить директорию из группы '$selected_group'? (y/n): " confirm
+      read -n1 -p "Вы уверены, что хотите удалить директорию из группы '$selected_group'? (y/N): " confirm
+      echo
       if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
         group_file="$groups_dir/$selected_group"
         # Создаем временный файл без удаляемой директории
@@ -336,7 +342,8 @@ remove_group() {
   fi
 
   if select_group "удаления"; then
-    read -p "Вы уверены, что хотите удалить группу '$selected_group'? (y/n): " confirm
+    read -n1 -p "Вы уверены, что хотите удалить группу '$selected_group'? (y/N): " confirm
+    echo
     if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
       rm "$groups_dir/$selected_group" && echo "Группа '$selected_group' удалена" || echo "Ошибка удаления"
     else
@@ -350,7 +357,8 @@ remove_all_groups() {
   local groups=($(get_groups_list))
   if (( ${#groups[@]} )); then
     list_groups
-    read -p "Вы уверены, что хотите удалить ВСЕ группы? (y/n): " confirm
+    read -n1 -p "Вы уверены, что хотите удалить ВСЕ группы? (y/N): " confirm
+    echo
     if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
       rm -f "$groups_dir"/* && echo "Все группы удалены" || echo "Ошибка удаления"
     else
@@ -383,7 +391,8 @@ if [ $result -eq 2 ] || [ $result -eq 1 ]; then
     echo "0) Выход"
     echo ""
 
-    read -p "Выберите действие (0-9): " choice
+    read -n1 -p "Выберите действие (0-9): " choice
+    echo
     case $choice in
       1) create_group ;;
       2) rename_group ;;
